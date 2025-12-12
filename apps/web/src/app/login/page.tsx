@@ -14,6 +14,8 @@ import {
 } from "@/components/ui/card";
 import { FullPageLoader } from "@/components/ui/loading-spinner";
 
+export const dynamic = "force-dynamic";
+
 function DiscordIcon({ className }: { className?: string }) {
   return (
     <svg className={className} fill="currentColor" viewBox="0 0 24 24">
