@@ -62,6 +62,18 @@ export const POST: RouteHandler = async (ctx) => {
   // Return session token in cookie
   const frontendUrl = process.env.FRONTEND_URL ?? "http://localhost:3000";
   const isSecure = frontendUrl.startsWith("https");
+  const cookieDomain = process.env.COOKIE_DOMAIN; // e.g., ".zotari.site" for cross-subdomain
+
+  const cookieParts = [
+    `session=${sessionToken}`,
+    "HttpOnly",
+    "Path=/",
+    `Max-Age=${60 * 60 * 24 * 7}`,
+    `SameSite=${isSecure ? "None" : "Lax"}`,
+  ];
+
+  if (isSecure) cookieParts.push("Secure");
+  if (cookieDomain) cookieParts.push(`Domain=${cookieDomain}`);
 
   return new Response(
     JSON.stringify({
@@ -76,7 +88,7 @@ export const POST: RouteHandler = async (ctx) => {
       status: 200,
       headers: {
         "Content-Type": "application/json",
-        "Set-Cookie": `session=${sessionToken}; HttpOnly; Path=/; Max-Age=${60 * 60 * 24 * 7}; SameSite=${isSecure ? "None; Secure" : "Lax"}`,
+        "Set-Cookie": cookieParts.join("; "),
       },
     }
   );

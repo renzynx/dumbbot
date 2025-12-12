@@ -13,11 +13,26 @@ export const POST: RouteHandler = async (ctx) => {
     await deleteSession(token);
   }
 
+  const frontendUrl = process.env.FRONTEND_URL ?? "http://localhost:3000";
+  const isSecure = frontendUrl.startsWith("https");
+  const cookieDomain = process.env.COOKIE_DOMAIN;
+
+  const cookieParts = [
+    "session=",
+    "Path=/",
+    "Max-Age=0",
+    "HttpOnly",
+    `SameSite=${isSecure ? "None" : "Lax"}`,
+  ];
+
+  if (isSecure) cookieParts.push("Secure");
+  if (cookieDomain) cookieParts.push(`Domain=${cookieDomain}`);
+
   return new Response(JSON.stringify({ success: true }), {
     status: 200,
     headers: {
       "Content-Type": "application/json",
-      "Set-Cookie": "session=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax",
+      "Set-Cookie": cookieParts.join("; "),
     },
   });
 };
