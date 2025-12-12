@@ -342,12 +342,24 @@ export class APIServer {
           });
         } catch (error) {
           this.logger.error(`Request error: ${error}`);
-          return json({ error: "Internal Server Error" }, 500);
+          return new Response(JSON.stringify({ error: "Internal Server Error" }), {
+            status: 500,
+            headers: {
+              "Content-Type": "application/json",
+              ...this.corsHeaders(req),
+            },
+          });
         }
       }
     }
 
-    return json({ error: "Not Found" }, 404);
+    return new Response(JSON.stringify({ error: "Not Found" }), {
+      status: 404,
+      headers: {
+        "Content-Type": "application/json",
+        ...this.corsHeaders(req),
+      },
+    });
   }
 
   /**
