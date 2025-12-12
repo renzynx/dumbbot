@@ -15,6 +15,7 @@ import {
 import { FullPageLoader } from "@/components/ui/loading-spinner";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 function DiscordIcon({ className }: { className?: string }) {
   return (

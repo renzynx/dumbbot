@@ -6,6 +6,7 @@ import { FullPageLoader } from "@/components/ui/loading-spinner";
 import { useAuth } from "@/hooks/use-auth";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export default function Home() {
   const router = useRouter();
