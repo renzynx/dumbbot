@@ -158,8 +158,6 @@ export function usePlayerSocket(
               lastUpdateTimeRef.current = now;
               setInterpolatedPosition(data.position);
 
-              // If we recently did an optimistic update, only update position-related fields
-              // to prevent optimistic state from being reverted
               const timeSinceOptimisticUpdate =
                 now - lastOptimisticUpdateRef.current;
               if (timeSinceOptimisticUpdate < OPTIMISTIC_UPDATE_DEBOUNCE) {
