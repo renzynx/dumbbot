@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  useMutation,
-  useQueryClient,
-  useSuspenseQuery,
-} from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { authApi } from "@/lib/api";
 import { authKeys } from "@/lib/query-keys";
@@ -21,8 +17,9 @@ export function useAuth() {
   const {
     data: user,
     error,
+    isLoading,
     refetch: refreshUser,
-  } = useSuspenseQuery({
+  } = useQuery({
     queryKey: authKeys.user(),
     queryFn: async () => {
       const { data, error } = await authApi.getMe();
@@ -32,6 +29,8 @@ export function useAuth() {
       }
       return data;
     },
+    retry: false,
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
   const logoutMutation = useMutation({
@@ -60,7 +59,7 @@ export function useAuth() {
     user,
     guilds: user?.guilds ?? [],
     isAuthenticated: !!user,
-    isLoading: false, // Always false with useSuspenseQuery - Suspense handles loading state
+    isLoading,
     error: error?.message ?? null,
     login: () => {
       router.push(authApi.getLoginUrl());
