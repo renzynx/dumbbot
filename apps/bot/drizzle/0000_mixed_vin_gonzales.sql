@@ -1,7 +1,6 @@
 CREATE TABLE `accounts` (
 	`user_id` text PRIMARY KEY NOT NULL,
 	`username` text NOT NULL,
-	`discriminator` text NOT NULL,
 	`avatar` text,
 	`access_token` text NOT NULL,
 	`refresh_token` text NOT NULL,
