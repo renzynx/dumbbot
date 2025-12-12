@@ -1,0 +1,11 @@
+export { NowPlaying } from "./now-playing";
+export { PlayerControls } from "./player-controls";
+export { Queue } from "./queue";
+export { AddTrack } from "./add-track";
+export { PlayerBar } from "./player-bar";
+export { Sidebar } from "./sidebar";
+export { MainContent } from "./main-content";
+export { LyricsPanel } from "./lyrics-panel";
+export { FilterPanel } from "./filter-panel";
+export { SearchAutocomplete } from "./search-autocomplete";
+export { CreatePlaylistDialog } from "./create-playlist-dialog";

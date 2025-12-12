@@ -1,0 +1,22 @@
+{
+  "name": "discordbot-workspace",
+  "private": true,
+  "workspaces": {
+    "packages": ["apps/*", "packages/*"],
+    "catalog": {
+      "discord.js": "^14.18.0",
+      "typescript": "^5.8.3"
+    }
+  },
+  "scripts": {
+    "dev": "bun run --cwd apps/bot index.ts",
+    "dev:watch": "bun run --watch --cwd apps/bot index.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.3.8",
+    "@discordbot/tsconfig": "workspace:*",
+    "@types/bun": "latest",
+    "typescript": "catalog:"
+  }
+}

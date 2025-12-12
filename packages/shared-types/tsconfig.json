@@ -1,0 +1,14 @@
+{
+  "extends": "@discordbot/tsconfig/bun-library",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    },
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
+}

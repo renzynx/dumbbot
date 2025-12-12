@@ -1,0 +1,13 @@
+{
+  "extends": "@discordbot/tsconfig/bun",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "target": "ESNext",
+    "module": "ESNext",
+    "paths": {
+      "@/*": ["src/*"]
+    }
+  },
+  "include": ["src/**/*", "index.ts"],
+  "exclude": ["node_modules"]
+}

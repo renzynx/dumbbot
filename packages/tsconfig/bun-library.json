@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "Bun Library",
+  "extends": "./base.json",
+  "compilerOptions": {
+    "lib": ["ESNext", "DOM"],
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true
+  }
+}

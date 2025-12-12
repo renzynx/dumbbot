@@ -1,0 +1,12 @@
+{
+  "extends": "@discordbot/tsconfig/bun",
+  "compilerOptions": {
+    "composite": false
+  },
+  "references": [
+    { "path": "./apps/bot" },
+    { "path": "./packages/lavalink" }
+  ],
+  "include": [],
+  "exclude": ["node_modules"]
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "Bun Application",
+  "extends": "./base.json",
+  "compilerOptions": {
+    "lib": ["ESNext", "DOM"],
+    "allowJs": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
+  }
+}
