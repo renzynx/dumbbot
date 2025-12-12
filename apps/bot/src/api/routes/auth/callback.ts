@@ -76,7 +76,7 @@ export const POST: RouteHandler = async (ctx) => {
       status: 200,
       headers: {
         "Content-Type": "application/json",
-        "Set-Cookie": `session=${sessionToken}; HttpOnly; Path=/; Max-Age=${60 * 60 * 24 * 7}; SameSite=Lax${isSecure ? "; Secure" : ""}`,
+        "Set-Cookie": `session=${sessionToken}; HttpOnly; Path=/; Max-Age=${60 * 60 * 24 * 7}; SameSite=${isSecure ? "None; Secure" : "Lax"}`,
       },
     }
   );
