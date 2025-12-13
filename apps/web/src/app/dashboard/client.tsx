@@ -6,9 +6,20 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { GuildCard } from "@/components/guild-card";
 import { useAuth } from "@/hooks/use-auth";
+import { botApi } from "@/lib/api";
+import { useQuery } from "@tanstack/react-query";
 
 export function DashboardContent() {
   const { user, guilds, logout, refreshGuilds, isRefreshingGuilds } = useAuth();
+
+  const { data: inviteData } = useQuery({
+    queryKey: ["bot-invite"],
+    queryFn: async () => {
+      const res = await botApi.getInvite();
+      return res.data;
+    },
+    staleTime: 1000 * 60 * 60, // 1 hour
+  });
 
   return (
     <div className="min-h-screen bg-background">
@@ -64,9 +75,9 @@ export function DashboardContent() {
               <p className="text-muted-foreground">
                 No servers found where the bot is installed.
               </p>
-              <Button asChild>
+              <Button asChild disabled={!inviteData?.inviteUrl}>
                 <a
-                  href={`https://discord.com/oauth2/authorize?client_id=${process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID}&permissions=3147776&scope=bot%20applications.commands`}
+                  href={inviteData?.inviteUrl ?? "#"}
                   target="_blank"
                   rel="noopener noreferrer"
                 >

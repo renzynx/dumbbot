@@ -7,7 +7,7 @@ import {
   useSuspenseQuery,
 } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { playlistApi } from "@/lib/api";
+import { playlistApi, type Track } from "@/lib/api";
 import { playlistKeys } from "@/lib/query-keys";
 
 export { playlistKeys } from "@/lib/query-keys";
@@ -53,7 +53,8 @@ export function useCreatePlaylist(guildId: string) {
         description,
       );
       if (error) throw new Error(error.error);
-      return data;
+      // Extract playlist from response wrapper
+      return data?.playlist ?? null;
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: playlistKeys.list(guildId) });
@@ -118,6 +119,38 @@ export function useLoadPlaylist(guildId: string) {
     },
     onError: (error: Error) => {
       toast.error("Failed to load playlist", { description: error.message });
+    },
+  });
+}
+
+export function useAddTrackToPlaylist(guildId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      playlistId,
+      track,
+    }: {
+      playlistId: string;
+      track: Track;
+    }) => {
+      const { data, error } = await playlistApi.addTrack(
+        guildId,
+        playlistId,
+        track,
+      );
+      if (error) throw new Error(error.error);
+      return data;
+    },
+    onSuccess: (data, { playlistId }) => {
+      queryClient.invalidateQueries({
+        queryKey: playlistKeys.detail(guildId, playlistId),
+      });
+      queryClient.invalidateQueries({ queryKey: playlistKeys.list(guildId) });
+      toast.success(data?.message ?? "Track added to playlist");
+    },
+    onError: (error: Error) => {
+      toast.error("Failed to add track", { description: error.message });
     },
   });
 }

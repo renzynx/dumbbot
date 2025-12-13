@@ -3,54 +3,31 @@ import { Glob } from "bun";
 import { relative } from "node:path";
 import type { BotClient } from "@/core/Client";
 import { Logger } from "@/utils/Logger";
-import { cleanupExpiredSessions } from "@/db/sessions";
-import type { AuthUser } from "@discordbot/shared-types";
-export type { AuthUser } from "@discordbot/shared-types";
+import { cleanupExpiredSessions, cleanupExpiredWSTokens, cleanupExpiredOAuthStates } from "@/db/sessions";
+import type {
+  RouteContext,
+  WebSocketData,
+  WSContext,
+  WSMessage,
+  RouteHandler,
+  WSHandler,
+  Middleware,
+  RouteModule,
+  WSModule,
+} from "@/types/api";
 
-export interface RouteContext {
-  req: Request;
-  params: Record<string, string>;
-  query: URLSearchParams;
-  client: BotClient;
-  server: APIServer;
-  user?: AuthUser;
-  json: <T = unknown>() => Promise<T>;
-}
-
-export interface WebSocketData {
-  userId?: string;
-  guildId?: string;
-  subscriptions: Set<string>;
-}
-
-export interface WSContext {
-  ws: ServerWebSocket<WebSocketData>;
-  data: Record<string, unknown>;
-  client: BotClient;
-  server: APIServer;
-}
-
-export interface WSMessage {
-  type: string;
-  [key: string]: unknown;
-}
-
-export type RouteHandler = (ctx: RouteContext) => Response | Promise<Response>;
-export type WSHandler = (ctx: WSContext) => void | Promise<void>;
-export type Middleware = (ctx: RouteContext, next: () => Promise<Response>) => Response | Promise<Response>;
-
-export interface RouteModule {
-  GET?: RouteHandler;
-  POST?: RouteHandler;
-  PUT?: RouteHandler;
-  PATCH?: RouteHandler;
-  DELETE?: RouteHandler;
-  middleware?: Middleware[];
-}
-
-export interface WSModule {
-  handlers: Record<string, WSHandler>;
-}
+// Re-export types for use by routes
+export type {
+  RouteContext,
+  WebSocketData,
+  WSContext,
+  WSMessage,
+  RouteHandler,
+  WSHandler,
+  Middleware,
+  RouteModule,
+  WSModule,
+} from "@/types/api";
 
 // ==================== Response Helpers ====================
 
@@ -89,6 +66,7 @@ export class APIServer {
   public readonly client: BotClient;
   private connections: ServerWebSocket<WebSocketData>[] = [];
   private sessionCleanupInterval: ReturnType<typeof setInterval> | null = null;
+  private wsTokenCleanupInterval: ReturnType<typeof setInterval> | null = null;
 
   constructor(client: BotClient) {
     this.client = client;
@@ -162,12 +140,7 @@ export class APIServer {
     }
   }
 
-  /**
-   * Convert file path to route path
-   * e.g., "auth/discord.ts" -> "/api/auth/discord"
-   *       "guilds/[guildId]/player.ts" -> "/api/guilds/:guildId/player"
-   */
-  private filePathToRoutePath(filePath: string): string {
+ private filePathToRoutePath(filePath: string): string {
     let route = filePath
       .replace(/\.ts$/, "")           // Remove .ts extension
       .replace(/\\/g, "/")            // Normalize path separators
@@ -177,10 +150,7 @@ export class APIServer {
     return `/api/${route}`;
   }
 
-  /**
-   * Compile a path pattern into regex
-   */
-  private compilePath(path: string): { pattern: RegExp; paramNames: string[] } {
+ private compilePath(path: string): { pattern: RegExp; paramNames: string[] } {
     const paramNames: string[] = [];
     const patternStr = path.replace(/:([^/]+)/g, (_, name) => {
       paramNames.push(name);
@@ -192,10 +162,7 @@ export class APIServer {
     };
   }
 
-  /**
-   * Register WebSocket handlers
-   */
-  registerWSHandlers(handlers: Record<string, WSHandler>): this {
+ registerWSHandlers(handlers: Record<string, WSHandler>): this {
     for (const [type, handler] of Object.entries(handlers)) {
       this.wsHandlers.set(type, handler);
       this.logger.debug(`Registered WS handler: ${type}`);
@@ -203,10 +170,7 @@ export class APIServer {
     return this;
   }
 
-  /**
-   * Start the API server
-   */
-  start(port: number = 3001): void {
+ start(port: number = 3001): void {
     const self = this;
 
     this.server = Bun.serve<WebSocketData>({
@@ -260,24 +224,29 @@ export class APIServer {
 
     this.logger.success(`API server listening on http://localhost:${port}`);
 
-    // Start session cleanup task (every hour)
     this.sessionCleanupInterval = setInterval(() => {
       cleanupExpiredSessions()
         .then(() => this.logger.debug("Session cleanup completed"))
         .catch((err) => this.logger.error("Session cleanup error:", err));
-    }, 60 * 60 * 1000);
+    }, 60 * 60 * 1000); // 1 hour
 
-    // Run initial cleanup
+    // Clean up WS tokens and OAuth states every minute
+    this.wsTokenCleanupInterval = setInterval(() => {
+      cleanupExpiredWSTokens();
+      cleanupExpiredOAuthStates();
+    }, 60 * 1000); // 1 minute
+
     cleanupExpiredSessions().catch(() => { });
   }
 
-  /**
-   * Stop the API server
-   */
   stop(): void {
     if (this.sessionCleanupInterval) {
       clearInterval(this.sessionCleanupInterval);
       this.sessionCleanupInterval = null;
+    }
+    if (this.wsTokenCleanupInterval) {
+      clearInterval(this.wsTokenCleanupInterval);
+      this.wsTokenCleanupInterval = null;
     }
     if (this.server) {
       this.server.stop();
@@ -286,10 +255,7 @@ export class APIServer {
     }
   }
 
-  /**
-   * Handle HTTP requests
-   */
-  private async handleRequest(req: Request, url: URL): Promise<Response> {
+ private async handleRequest(req: Request, url: URL): Promise<Response> {
     const path = url.pathname;
     const method = req.method;
 
@@ -362,10 +328,7 @@ export class APIServer {
     });
   }
 
-  /**
-   * Execute middleware chain
-   */
-  private async executeMiddlewareChain(
+ private async executeMiddlewareChain(
     ctx: RouteContext,
     middleware: Middleware[],
     handler: () => Promise<Response>
@@ -383,10 +346,7 @@ export class APIServer {
     return next();
   }
 
-  /**
-   * Handle WebSocket messages
-   */
-  private async handleWSMessage(
+ private async handleWSMessage(
     ws: ServerWebSocket<WebSocketData>,
     message: string | Buffer
   ): Promise<void> {
@@ -411,20 +371,13 @@ export class APIServer {
     }
   }
 
-  /**
-   * Broadcast a message to all connected WebSocket clients
-   */
-  broadcast(message: WSMessage): void {
+ broadcast(message: WSMessage): void {
     const data = JSON.stringify(message);
     for (const ws of this.connections) {
       ws.send(data);
     }
   }
-
-  /**
-   * Broadcast to clients subscribed to a specific guild
-   */
-  broadcastToGuild(guildId: string, message: WSMessage): void {
+ broadcastToGuild(guildId: string, message: WSMessage): void {
     const data = JSON.stringify(message);
     for (const ws of this.connections) {
       if (ws.data.guildId === guildId || ws.data.subscriptions.has(guildId)) {
@@ -433,18 +386,11 @@ export class APIServer {
     }
   }
 
-  /**
-   * Send to a specific WebSocket connection
-   */
-  send(ws: ServerWebSocket<WebSocketData>, message: WSMessage): void {
+ send(ws: ServerWebSocket<WebSocketData>, message: WSMessage): void {
     ws.send(JSON.stringify(message));
   }
 
-  /**
-   * CORS headers
-   */
-  private corsHeaders(req?: Request): Record<string, string> {
-    // When allowing credentials, we must specify the exact origin (not *)
+ private corsHeaders(req?: Request): Record<string, string> {
     const allowedOrigins = (process.env.FRONTEND_URL ?? "http://localhost:3000").split(",");
     const requestOrigin = req?.headers.get("Origin") ?? "";
 

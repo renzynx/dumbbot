@@ -298,3 +298,61 @@ export function cleanupExpiredOAuthStates(): void {
     }
   }
 }
+
+// ============================================
+// WebSocket Token Management
+// ============================================
+
+// Short-lived tokens for WebSocket authentication
+// Map: token -> { userId, expiresAt }
+const wsTokensMap = new Map<string, { userId: string; expiresAt: number }>();
+
+// WS tokens expire after 30 seconds (just enough time to connect)
+const WS_TOKEN_TTL = 30 * 1000;
+
+/**
+ * Generate a short-lived WebSocket authentication token
+ */
+export function createWSToken(userId: string): string {
+  const bytes = new Uint8Array(32);
+  crypto.getRandomValues(bytes);
+  const token = Array.from(bytes)
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+
+  wsTokensMap.set(token, {
+    userId,
+    expiresAt: Date.now() + WS_TOKEN_TTL,
+  });
+
+  return token;
+}
+
+/**
+ * Validate and consume a WebSocket token
+ * Returns userId if valid, null otherwise
+ */
+export function validateWSToken(token: string): string | null {
+  const data = wsTokensMap.get(token);
+  if (!data) return null;
+
+  // Delete the token (one-time use)
+  wsTokensMap.delete(token);
+
+  // Check if expired
+  if (data.expiresAt < Date.now()) return null;
+
+  return data.userId;
+}
+
+/**
+ * Clean up expired WebSocket tokens
+ */
+export function cleanupExpiredWSTokens(): void {
+  const now = Date.now();
+  for (const [token, data] of wsTokensMap) {
+    if (data.expiresAt < now) {
+      wsTokensMap.delete(token);
+    }
+  }
+}

@@ -1,6 +1,10 @@
-import { redirect, type RouteHandler } from "@/api/server";
+import { redirect, type RouteHandler, type Middleware } from "@/api/server";
 import { DISCORD_CONFIG } from "@/api/middleware/auth";
+import { authRateLimit } from "@/api/middleware/rate-limit";
 import { createOAuthState } from "@/db/sessions";
+
+// Apply stricter rate limiting to auth endpoints
+export const middleware: Middleware[] = [authRateLimit];
 
 /**
  * GET /api/auth/discord

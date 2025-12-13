@@ -1,55 +1,16 @@
 import { eq, and, or } from "drizzle-orm";
+import { Collection } from "discord.js";
 import { db } from "@/db";
 import { playlists, playlistTracks, guildSettings } from "@/db/schema";
 import type { Playlist, GuildSettingsRow } from "@/db/schema";
-
-/**
- * Per-guild music settings interface
- */
-export interface GuildMusicSettings {
-  guildId: string;
-  djRoleId: string | null;
-  djOnlyMode: boolean;
-  twentyFourSevenMode: boolean;
-  autoplayEnabled: boolean;
-  defaultVolume: number;
-  voteSkipEnabled: boolean;
-  voteSkipPercentage: number;
-}
-
-/**
- * Saved playlist with tracks (for API responses)
- */
-export interface SavedPlaylist {
-  id: string;
-  name: string;
-  guildId: string;
-  ownerId: string;
-  ownerName: string;
-  tracks: SavedTrack[];
-  createdAt: number;
-  updatedAt: number;
-  isPublic: boolean;
-}
-
-/**
- * Track saved in playlist
- */
-export interface SavedTrack {
-  encoded: string;
-  title: string;
-  author: string;
-  uri: string;
-  duration: number;
-  artworkUrl?: string;
-}
+import type { GuildMusicSettings, SavedPlaylist, SavedTrack } from "@/types/music";
+export type { GuildMusicSettings, SavedPlaylist, SavedTrack } from "@/types/music";
 
 /**
  * Guild settings manager with SQLite persistence via Drizzle
  */
 export class GuildSettingsManager {
-  // In-memory cache for performance
-  private readonly settingsCache = new Map<string, GuildMusicSettings>();
+  private readonly settingsCache = new Collection<string, GuildMusicSettings>();
 
   /**
    * Get settings for a guild
@@ -73,6 +34,17 @@ export class GuildSettingsManager {
     this.saveSettings(defaults);
     this.settingsCache.set(guildId, defaults);
     return defaults;
+  }
+
+  /**
+   * Preload all guild settings into cache
+   */
+  preload(): number {
+    const rows = db.select().from(guildSettings).all();
+    for (const row of rows) {
+      this.settingsCache.set(row.guildId, this.rowToSettings(row));
+    }
+    return rows.length;
   }
 
   /**

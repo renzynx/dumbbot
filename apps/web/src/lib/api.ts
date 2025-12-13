@@ -14,7 +14,6 @@ export type {
 	PlayerState,
 	Playlist,
 	PlaylistWithTracks,
-	QueueResponse,
 	SearchSuggestion,
 	Track,
 	User,
@@ -26,13 +25,10 @@ import type {
 	ClearFilterResponse,
 	FilterPresetsResponse,
 	Guild,
-	LoopMode,
 	LyricsResult,
 	ParsedLyricLine,
-	PlayerState,
 	Playlist,
 	PlaylistWithTracks,
-	QueueResponse,
 	Track,
 	User,
 } from "@discordbot/shared-types";
@@ -137,137 +133,9 @@ export const authApi = {
 		api.post<{ success: boolean; guilds: Guild[] }>("/api/auth/refresh-guilds"),
 
 	logout: () => api.post<{ success: boolean }>("/api/auth/logout"),
-};
 
-// ============================================
-// Player API Methods
-// ============================================
-
-export const playerApi = {
-	/**
-	 * Get player state for a guild
-	 */
-	getState: (guildId: string) =>
-		api.get<PlayerState>(`/api/guilds/${guildId}/player`),
-
-	/**
-	 * Play a track or resume playback
-	 */
-	play: (guildId: string, query?: string) =>
-		api.post<{ success: boolean; track?: Track }>(
-			`/api/guilds/${guildId}/player/play`,
-			query ? { query } : undefined,
-		),
-
-	/**
-	 * Pause playback
-	 */
-	pause: (guildId: string) =>
-		api.post<{ success: boolean }>(`/api/guilds/${guildId}/player/pause`),
-
-	/**
-	 * Skip current track
-	 */
-	skip: (guildId: string) =>
-		api.post<{ success: boolean; skipped?: Track }>(
-			`/api/guilds/${guildId}/player/skip`,
-		),
-
-	/**
-	 * Stop playback and clear queue
-	 */
-	stop: (guildId: string) =>
-		api.post<{ success: boolean }>(`/api/guilds/${guildId}/player/stop`),
-
-	/**
-	 * Seek to position in current track
-	 */
-	seek: (guildId: string, position: number) =>
-		api.post<{ success: boolean; position: number }>(
-			`/api/guilds/${guildId}/player/seek`,
-			{ position },
-		),
-
-	/**
-	 * Set volume (0-100)
-	 */
-	setVolume: (guildId: string, volume: number) =>
-		api.patch<{ success: boolean; volume: number }>(
-			`/api/guilds/${guildId}/player/volume`,
-			{ volume },
-		),
-
-	/**
-	 * Set loop mode
-	 */
-	setLoop: (guildId: string, mode: LoopMode) =>
-		api.patch<{ success: boolean; loop: string }>(
-			`/api/guilds/${guildId}/player/loop`,
-			{ mode },
-		),
-
-	/**
-	 * Shuffle the queue
-	 */
-	shuffle: (guildId: string) =>
-		api.post<{ success: boolean; queue: Track[] }>(
-			`/api/guilds/${guildId}/player/shuffle`,
-		),
-
-	/**
-	 * Get playback history
-	 */
-	getHistory: (guildId: string, limit?: number) => {
-		const query = limit ? `?limit=${limit}` : "";
-		return api.get<{ history: Track[] }>(
-			`/api/guilds/${guildId}/player/history${query}`,
-		);
-	},
-};
-
-// ============================================
-// Queue API Methods
-// ============================================
-
-export const queueApi = {
-	/**
-	 * Get the current queue
-	 */
-	get: (guildId: string) =>
-		api.get<QueueResponse>(`/api/guilds/${guildId}/queue`),
-
-	/**
-	 * Add a track to the queue
-	 */
-	add: (guildId: string, query: string) =>
-		api.post<{
-			success: boolean;
-			track?: Track;
-			playlist?: { name: string; tracks: Track[] };
-		}>(`/api/guilds/${guildId}/queue`, { query }),
-
-	/**
-	 * Clear the queue
-	 */
-	clear: (guildId: string) =>
-		api.delete<{ success: boolean }>(`/api/guilds/${guildId}/queue`),
-
-	/**
-	 * Remove a track from the queue
-	 */
-	remove: (guildId: string, position: number) =>
-		api.delete<{ success: boolean; removed: Track }>(
-			`/api/guilds/${guildId}/queue/${position}`,
-		),
-
-	/**
-	 * Move a track in the queue
-	 */
-	move: (guildId: string, from: number, to: number) =>
-		api.patch<{ success: boolean; queue: Track[] }>(
-			`/api/guilds/${guildId}/queue/move`,
-			{ from, to },
-		),
+	/** Get a short-lived token for WebSocket authentication */
+	getWSToken: () => api.get<{ token: string }>("/api/auth/ws-token"),
 };
 
 // ============================================
@@ -302,9 +170,105 @@ export function parseSyncedLyrics(lrc: string): ParsedLyricLine[] {
 	return lines.sort((a, b) => a.time - b.time);
 }
 
+/**
+ * Calculate string similarity using Levenshtein distance (0-1, higher is better)
+ */
+function stringSimilarity(a: string, b: string): number {
+	const aLower = a.toLowerCase().trim();
+	const bLower = b.toLowerCase().trim();
+
+	if (aLower === bLower) return 1;
+	if (aLower.length === 0 || bLower.length === 0) return 0;
+
+	// Simple containment check for partial matches
+	if (aLower.includes(bLower) || bLower.includes(aLower)) {
+		return 0.8;
+	}
+
+	// Levenshtein distance
+	const matrix: number[][] = [];
+	for (let i = 0; i <= bLower.length; i++) {
+		matrix[i] = [i];
+	}
+	for (let j = 0; j <= aLower.length; j++) {
+		matrix[0][j] = j;
+	}
+	for (let i = 1; i <= bLower.length; i++) {
+		for (let j = 1; j <= aLower.length; j++) {
+			if (bLower[i - 1] === aLower[j - 1]) {
+				matrix[i][j] = matrix[i - 1][j - 1];
+			} else {
+				matrix[i][j] = Math.min(
+					matrix[i - 1][j - 1] + 1,
+					matrix[i][j - 1] + 1,
+					matrix[i - 1][j] + 1,
+				);
+			}
+		}
+	}
+
+	const maxLen = Math.max(aLower.length, bLower.length);
+	return 1 - matrix[bLower.length][aLower.length] / maxLen;
+}
+
+/**
+ * Calculate duration similarity (0-1, higher is better)
+ * Allows 5 second tolerance for exact match
+ */
+function durationSimilarity(a: number, b: number): number {
+	if (a === 0 || b === 0) return 0.5; // Unknown duration, neutral score
+	const diff = Math.abs(a - b);
+	if (diff <= 5) return 1; // Within 5 seconds is perfect
+	if (diff <= 15) return 0.8; // Within 15 seconds is good
+	if (diff <= 30) return 0.5; // Within 30 seconds is acceptable
+	return Math.max(0, 1 - diff / 120); // Gradual falloff
+}
+
+/**
+ * Find the best matching lyrics result from search results
+ */
+function findBestMatch(
+	results: LyricsResult[],
+	trackName: string,
+	artistName: string,
+	durationMs?: number,
+): LyricsResult | null {
+	if (results.length === 0) return null;
+
+	const durationSec = durationMs ? Math.floor(durationMs / 1000) : 0;
+
+	let bestMatch: LyricsResult | null = null;
+	let bestScore = -1;
+
+	for (const result of results) {
+		// Skip results without lyrics
+		if (!result.syncedLyrics && !result.plainLyrics) continue;
+
+		const titleScore = stringSimilarity(trackName, result.trackName);
+		const artistScore = stringSimilarity(artistName, result.artistName);
+		const durationScore = durationSec
+			? durationSimilarity(durationSec, result.duration)
+			: 0.5;
+
+		// Weighted score: title is most important, then artist, then duration
+		// Bonus for having synced lyrics
+		const syncedBonus = result.syncedLyrics ? 0.1 : 0;
+		const score =
+			titleScore * 0.4 + artistScore * 0.35 + durationScore * 0.25 + syncedBonus;
+
+		if (score > bestScore) {
+			bestScore = score;
+			bestMatch = result;
+		}
+	}
+
+	// Only return if we have a reasonable match (score > 0.4)
+	return bestScore > 0.4 ? bestMatch : null;
+}
+
 export const lyricsApi = {
 	/**
-	 * Search for lyrics by track name and artist
+	 * Search for lyrics by track name and artist, finding the best match
 	 */
 	search: async (
 		trackName: string,
@@ -312,18 +276,17 @@ export const lyricsApi = {
 		duration?: number,
 	): Promise<LyricsResult | null> => {
 		try {
-			const params = new URLSearchParams({
-				track_name: trackName,
-				artist_name: artistName,
-			});
+			if (!trackName.trim()) return null;
 
-			if (duration) {
-				// lrclib expects duration in seconds
-				params.set("duration", Math.floor(duration / 1000).toString());
+			// Use track_name and artist_name params for more accurate search
+			const params = new URLSearchParams();
+			params.set("track_name", trackName.trim());
+			if (artistName.trim()) {
+				params.set("artist_name", artistName.trim());
 			}
 
 			const response = await fetch(
-				`https://lrclib.net/api/get?${params.toString()}`,
+				`https://lrclib.net/api/search?${params.toString()}`,
 				{
 					headers: {
 						"Content-Type": "application/json",
@@ -335,10 +298,11 @@ export const lyricsApi = {
 				if (response.status === 404) {
 					return null;
 				}
-				throw new Error(`Failed to fetch lyrics: ${response.status}`);
+				throw new Error(`Failed to search lyrics: ${response.status}`);
 			}
 
-			return await response.json();
+			const results: LyricsResult[] = await response.json();
+			return findBestMatch(results, trackName, artistName, duration);
 		} catch (error) {
 			console.error("Lyrics search error:", error);
 			return null;
@@ -346,7 +310,7 @@ export const lyricsApi = {
 	},
 
 	/**
-	 * Search for lyrics with multiple results
+	 * Search for lyrics with multiple results using a general query
 	 */
 	searchAll: async (query: string): Promise<LyricsResult[]> => {
 		try {
@@ -394,10 +358,13 @@ export const playlistApi = {
 	 * Create a new playlist
 	 */
 	create: (guildId: string, name: string, description?: string) =>
-		api.post<Playlist>(`/api/guilds/${guildId}/playlists`, {
-			name,
-			description,
-		}),
+		api.post<{ success: boolean; playlist: Playlist }>(
+			`/api/guilds/${guildId}/playlists`,
+			{
+				name,
+				description,
+			},
+		),
 
 	/**
 	 * Delete a playlist
@@ -421,6 +388,24 @@ export const playlistApi = {
 	load: (guildId: string, playlistId: string) =>
 		api.post<{ success: boolean; message: string; addedCount: number }>(
 			`/api/guilds/${guildId}/playlists/${playlistId}/load`,
+		),
+
+	/**
+	 * Add a single track to a playlist
+	 */
+	addTrack: (guildId: string, playlistId: string, track: Track) =>
+		api.post<{ success: boolean; message: string; position: number }>(
+			`/api/guilds/${guildId}/playlists/${playlistId}/tracks`,
+			{
+				track: {
+					encoded: track.encoded,
+					title: track.title,
+					author: track.author,
+					uri: track.uri,
+					duration: track.duration,
+					artworkUrl: track.artworkUrl,
+				},
+			},
 		),
 };
 
@@ -478,4 +463,21 @@ export const filtersApi = {
 	 */
 	clear: (guildId: string) =>
 		api.delete<ClearFilterResponse>(`/api/guilds/${guildId}/player/filters`),
+};
+
+// ============================================
+// Bot API Methods
+// ============================================
+
+export interface BotInviteResponse {
+	clientId: string;
+	inviteUrl: string;
+	permissions: number;
+}
+
+export const botApi = {
+	/**
+	 * Get the bot invite URL
+	 */
+	getInvite: () => api.get<BotInviteResponse>("/api/bot/invite"),
 };

@@ -1,20 +1,26 @@
 import type { APIServer } from "@/api/server";
 import type { QueueTrack, HistoryTrack } from "@/music/Queue";
-import { LoopMode } from "@/music/Queue";
 import type { MusicManager } from "@/music/MusicManager";
 import type { Client, VoiceBasedChannel } from "discord.js";
 import { ChannelType } from "discord.js";
+import { Logger } from "@/utils/Logger";
+
+const logger = new Logger("Helpers");
 
 /**
  * Format a queue track for API response
  */
 export function formatTrack(track: QueueTrack) {
   return {
+    encoded: track.track.encoded,
+    identifier: track.track.info.identifier,
     title: track.track.info.title,
     author: track.track.info.author,
     uri: track.track.info.uri,
     duration: track.track.info.length,
     artworkUrl: track.track.info.artworkUrl,
+    sourceName: track.track.info.sourceName,
+    isStream: track.track.info.isStream,
     requester: track.requester,
     requesterId: track.requesterId,
   };
@@ -32,24 +38,11 @@ export function formatHistoryTrack(track: HistoryTrack) {
 
 /**
  * Broadcast player update to all subscribed WebSocket clients
+ * Uses cached player state from MusicManager for better performance
  */
 export function broadcastPlayerUpdate(server: APIServer, music: MusicManager, guildId: string) {
-  const queue = music.queues.get(guildId);
-  const node = music.getIdealNode();
-  const player = node?.getPlayer(guildId);
-
-  server.broadcastToGuild(guildId, {
-    type: "playerUpdate",
-    data: {
-      playing: !!queue?.current,
-      current: queue?.current ? formatTrack(queue.current) : null,
-      queue: queue?.tracks.map((t) => formatTrack(t)) ?? [],
-      position: player?.state.position ?? 0,
-      volume: queue?.volume ?? 100,
-      loopMode: queue?.loopMode ?? LoopMode.None,
-      paused: player?.paused ?? false,
-    },
-  });
+  // Delegate to MusicManager's broadcastPlayerUpdate which uses cached state
+  music.broadcastPlayerUpdate(guildId);
 }
 
 /**
@@ -124,7 +117,7 @@ export async function ensureVoiceConnection(
     await music.connect(guildId, userChannel.id);
     return null;
   } catch (error) {
-    console.error("Failed to connect to voice channel:", error);
+    logger.error("Failed to connect to voice channel:", error);
     return "Failed to connect to your voice channel";
   }
 }

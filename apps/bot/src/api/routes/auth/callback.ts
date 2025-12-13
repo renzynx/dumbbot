@@ -1,4 +1,4 @@
-import { json, type RouteHandler } from "@/api/server";
+import { json, type RouteHandler, type Middleware } from "@/api/server";
 import {
   exchangeCode,
   fetchDiscordUser,
@@ -6,7 +6,11 @@ import {
   filterCommonGuilds,
   generateSessionToken,
 } from "@/api/middleware/auth";
+import { authRateLimit } from "@/api/middleware/rate-limit";
 import { createSession, upsertAccount, validateOAuthState } from "@/db/sessions";
+
+// Apply stricter rate limiting to auth endpoints
+export const middleware: Middleware[] = [authRateLimit];
 
 /**
  * POST /api/auth/callback

@@ -6,6 +6,7 @@
   "exports": {
     "./base": "./base.json",
     "./bun": "./bun.json",
-    "./bun-library": "./bun-library.json"
+    "./bun-library": "./bun-library.json",
+    "./nextjs": "./nextjs.json"
   }
 }

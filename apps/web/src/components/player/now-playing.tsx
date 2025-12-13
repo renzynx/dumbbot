@@ -4,24 +4,16 @@ import { type Track } from "@/lib/api";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Music } from "lucide-react";
+import { AddToPlaylist } from "./add-to-playlist";
+import { formatTime } from "@/lib/utils";
 
 interface NowPlayingProps {
+  guildId: string;
   track: Track | null;
   isLoading?: boolean;
 }
 
-function formatDuration(ms: number): string {
-  const seconds = Math.floor(ms / 1000);
-  const minutes = Math.floor(seconds / 60);
-  const hours = Math.floor(minutes / 60);
-
-  if (hours > 0) {
-    return `${hours}:${String(minutes % 60).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`;
-  }
-  return `${minutes}:${String(seconds % 60).padStart(2, "0")}`;
-}
-
-export function NowPlaying({ track, isLoading }: NowPlayingProps) {
+export function NowPlaying({ guildId, track, isLoading }: NowPlayingProps) {
   if (isLoading) {
     return (
       <Card>
@@ -73,7 +65,7 @@ export function NowPlaying({ track, isLoading }: NowPlayingProps) {
           <h3 className="truncate font-semibold">{track.title}</h3>
           <p className="truncate text-sm text-muted-foreground">{track.author}</p>
           <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
-            <span>{formatDuration(track.duration)}</span>
+            <span>{formatTime(track.duration)}</span>
             <span>•</span>
             <span className="capitalize">{track.sourceName}</span>
             {track.requestedBy && (
@@ -84,6 +76,7 @@ export function NowPlaying({ track, isLoading }: NowPlayingProps) {
             )}
           </div>
         </div>
+        <AddToPlaylist guildId={guildId} track={track} />
       </CardContent>
     </Card>
   );

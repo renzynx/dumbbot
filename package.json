@@ -4,14 +4,16 @@
   "workspaces": {
     "packages": ["apps/*", "packages/*"],
     "catalog": {
-      "discord.js": "^14.18.0",
-      "typescript": "^5.8.3"
+      "discord.js": "^14.25.1",
+      "typescript": "^5.9.3",
+      "drizzle-orm": "^0.45.1",
+      "drizzle-kit": "^0.31.8",
+      "better-sqlite3": "^12.5.0"
     }
   },
   "scripts": {
-    "dev": "bun run --cwd apps/bot index.ts",
-    "dev:watch": "bun run --watch --cwd apps/bot index.ts",
-    "typecheck": "tsc --noEmit"
+    "dev": "bun run --watch --cwd apps/bot src/index.ts",
+    "format-and-lint": "biome check --fix"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.8",

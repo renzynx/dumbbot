@@ -1,20 +1,6 @@
 import type { Track } from "@discordbot/lavalink";
-
-export interface QueueTrack {
-  track: Track;
-  requester: string;
-  requesterId: string;
-}
-
-export interface HistoryTrack extends QueueTrack {
-  playedAt: number;
-}
-
-export enum LoopMode {
-  None = "none",
-  Track = "track",
-  Queue = "queue",
-}
+import type { QueueTrack, HistoryTrack } from "@/types/music";
+import { LoopMode } from "@/types/music";
 
 /**
  * Queue manager for a single guild
@@ -228,3 +214,5 @@ export class Queue {
     return this.skipVotes.size;
   }
 }
+
+export { LoopMode, type QueueTrack, type HistoryTrack } from "@/types/music";

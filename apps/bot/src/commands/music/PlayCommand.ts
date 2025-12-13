@@ -3,6 +3,7 @@ import { Command } from "@/core/Command";
 import type { BotClient } from "@/core/Client";
 import type { CommandContext } from "@/core/Context";
 import { SlashCommand, GuildOnly } from "@/decorators";
+import { formatDuration } from "@/utils/format";
 import type { Track } from "@discordbot/lavalink";
 
 /**
@@ -29,20 +30,6 @@ function formatTrackName(track: Track): string {
   
   // If author is too long, just use title
   return `${title.slice(0, 93)}... [${duration}]`;
-}
-
-/**
- * Format duration in mm:ss or hh:mm:ss
- */
-function formatDuration(ms: number): string {
-  const seconds = Math.floor(ms / 1000);
-  const minutes = Math.floor(seconds / 60);
-  const hours = Math.floor(minutes / 60);
-
-  if (hours > 0) {
-    return `${hours}:${(minutes % 60).toString().padStart(2, "0")}:${(seconds % 60).toString().padStart(2, "0")}`;
-  }
-  return `${minutes}:${(seconds % 60).toString().padStart(2, "0")}`;
 }
 
 @SlashCommand("play", "Play a song or add it to the queue")

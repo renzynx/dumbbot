@@ -1,8 +1,8 @@
+import { Collection } from "discord.js";
 import type { BotClient } from "@/core/Client";
 import type { Command } from "@/core/Command";
 import type { Event } from "@/core/Event";
 import type { ModuleOptions } from "@/types";
-import { Collection } from "@/utils/Collection";
 import { Logger } from "@/utils/Logger";
 
 /**

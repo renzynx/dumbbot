@@ -8,6 +8,9 @@ import {
   updateAccountGuilds,
   type Guild,
 } from "@/db/sessions";
+import { Logger } from "@/utils/Logger";
+
+const logger = new Logger("Auth");
 
 /**
  * Discord OAuth configuration
@@ -207,7 +210,7 @@ export async function exchangeCode(code: string): Promise<{
     });
 
     if (!response.ok) {
-      console.error("Token exchange failed:", await response.text());
+      logger.error("Token exchange failed:", await response.text());
       return null;
     }
 
@@ -223,7 +226,7 @@ export async function exchangeCode(code: string): Promise<{
       expiresAt: Date.now() + data.expires_in * 1000,
     };
   } catch (error) {
-    console.error("Token exchange error:", error);
+    logger.error("Token exchange error:", error);
     return null;
   }
 }
@@ -311,13 +314,13 @@ export async function fetchUserGuilds(accessToken: string): Promise<Guild[] | nu
     });
 
     if (!response.ok) {
-      console.error("Failed to fetch guilds:", response.status, await response.text());
+      logger.error("Failed to fetch guilds:", response.status, await response.text());
       return null;
     }
 
     return response.json() as Promise<Guild[]>;
   } catch (error) {
-    console.error("Error fetching guilds:", error);
+    logger.error("Error fetching guilds:", error);
     return null;
   }
 }
@@ -332,3 +335,28 @@ export function filterCommonGuilds(
 ): Guild[] {
   return userGuilds.filter((g) => botGuildIds.has(g.id));
 }
+
+/**
+ * Middleware to require DJ role for music control actions
+ * Must be used after requireAuth and requireGuildAccess
+ */
+export const requireDJRole: Middleware = async (ctx, next) => {
+  const guildId = ctx.params.guildId;
+  const userId = ctx.user?.id;
+
+  if (!guildId || !userId) {
+    return json({ error: "Guild ID and user required" }, 400);
+  }
+
+  const music = ctx.client.music;
+  if (!music) {
+    return json({ error: "Music system not available" }, 503);
+  }
+
+  const hasDJ = music.hasDJPermissions(guildId, userId);
+  if (!hasDJ) {
+    return json({ error: "Forbidden", message: "DJ role required" }, 403);
+  }
+
+  return next();
+};

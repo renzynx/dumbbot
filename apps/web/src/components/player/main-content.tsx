@@ -46,10 +46,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import type { Track } from "@/lib/api";
-import { cn } from "@/lib/utils";
+import { cn, formatTime } from "@/lib/utils";
+import { AddToPlaylist } from "./add-to-playlist";
 import { SearchAutocomplete } from "./search-autocomplete";
 
 interface MainContentProps {
+  guildId: string;
   currentTrack: Track | null;
   queue: Track[];
   onAddTrack: (query: string) => void;
@@ -59,18 +61,8 @@ interface MainContentProps {
   onPlayNext: (index: number) => void;
 }
 
-function formatDuration(ms: number): string {
-  const seconds = Math.floor(ms / 1000);
-  const minutes = Math.floor(seconds / 60);
-  const hours = Math.floor(minutes / 60);
-
-  if (hours > 0) {
-    return `${hours}:${String(minutes % 60).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`;
-  }
-  return `${minutes}:${String(seconds % 60).padStart(2, "0")}`;
-}
-
 interface SortableUpNextItemProps {
+  guildId: string;
   track: Track;
   index: number;
   queueLength: number;
@@ -81,6 +73,7 @@ interface SortableUpNextItemProps {
 }
 
 function SortableUpNextItem({
+  guildId,
   track,
   index,
   queueLength,
@@ -115,7 +108,7 @@ function SortableUpNextItem({
         isDragging && "bg-accent/80 opacity-90 z-50",
       )}
     >
-      <TableCell className="w-10 p-2">
+      <TableCell className="w-8 md:w-10 p-1 md:p-2">
         <div
           {...attributes}
           {...listeners}
@@ -124,9 +117,9 @@ function SortableUpNextItem({
           <GripVertical className="h-4 w-4" />
         </div>
       </TableCell>
-      <TableCell className="p-2">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="w-10 h-10 flex-shrink-0">
+      <TableCell className="p-1 md:p-2">
+        <div className="flex items-center gap-2 md:gap-3 min-w-0">
+          <div className="w-9 h-9 md:w-10 md:h-10 flex-shrink-0">
             {track.artworkUrl ? (
               <img
                 src={track.artworkUrl}
@@ -139,84 +132,86 @@ function SortableUpNextItem({
               </div>
             )}
           </div>
-          <div className="min-w-0">
-            <p className="text-foreground text-sm truncate">{track.title}</p>
+          <div className="min-w-0 flex-1">
+            <p className="text-foreground text-xs md:text-sm truncate">{track.title}</p>
             <p className="text-muted-foreground text-xs truncate">{track.author}</p>
           </div>
         </div>
       </TableCell>
-      <TableCell className="w-24 p-2">
-        <div className="flex items-center justify-end gap-2">
-          <span className="text-muted-foreground text-sm">
-            {formatDuration(track.duration)}
-          </span>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-foreground"
-              >
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="end"
-              className="w-48 bg-popover border-border"
+      <TableCell className="hidden sm:table-cell w-24 p-2 text-right">
+        <span className="text-muted-foreground text-sm">
+          {formatTime(track.duration)}
+        </span>
+      </TableCell>
+      <TableCell className="w-10 md:w-12 p-1 md:p-2 text-right">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-muted-foreground hover:text-foreground"
             >
-              {!isFirst && (
-                <DropdownMenuItem
-                  onClick={onPlayNext}
-                  className="text-popover-foreground focus:text-accent-foreground focus:bg-accent"
-                >
-                  <Play className="h-4 w-4 mr-2" />
-                  Play Next
-                </DropdownMenuItem>
-              )}
-              {!isFirst && (
-                <DropdownMenuItem
-                  onClick={onMoveUp}
-                  className="text-popover-foreground focus:text-accent-foreground focus:bg-accent"
-                >
-                  <ArrowUp className="h-4 w-4 mr-2" />
-                  Move Up
-                </DropdownMenuItem>
-              )}
-              {!isLast && (
-                <DropdownMenuItem
-                  onClick={onMoveDown}
-                  className="text-popover-foreground focus:text-accent-foreground focus:bg-accent"
-                >
-                  <ArrowDown className="h-4 w-4 mr-2" />
-                  Move Down
-                </DropdownMenuItem>
-              )}
-              {track.uri && (
-                <DropdownMenuItem
-                  onClick={() => window.open(track.uri, "_blank")}
-                  className="text-popover-foreground focus:text-accent-foreground focus:bg-accent"
-                >
-                  <ExternalLink className="h-4 w-4 mr-2" />
-                  Open Source
-                </DropdownMenuItem>
-              )}
-              <DropdownMenuSeparator className="bg-border" />
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            align="end"
+            className="w-48 bg-popover border-border"
+          >
+            <AddToPlaylist guildId={guildId} track={track} variant="menu-item" />
+            {!isFirst && (
               <DropdownMenuItem
-                onClick={onRemove}
-                className="text-destructive focus:text-destructive focus:bg-accent"
+                onClick={onPlayNext}
+                className="text-popover-foreground focus:text-accent-foreground focus:bg-accent"
               >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Remove from Queue
+                <Play className="h-4 w-4 mr-2" />
+                Play Next
               </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+            )}
+            {!isFirst && (
+              <DropdownMenuItem
+                onClick={onMoveUp}
+                className="text-popover-foreground focus:text-accent-foreground focus:bg-accent"
+              >
+                <ArrowUp className="h-4 w-4 mr-2" />
+                Move Up
+              </DropdownMenuItem>
+            )}
+            {!isLast && (
+              <DropdownMenuItem
+                onClick={onMoveDown}
+                className="text-popover-foreground focus:text-accent-foreground focus:bg-accent"
+              >
+                <ArrowDown className="h-4 w-4 mr-2" />
+                Move Down
+              </DropdownMenuItem>
+            )}
+            {track.uri && (
+              <DropdownMenuItem
+                onClick={() => window.open(track.uri, "_blank")}
+                className="text-popover-foreground focus:text-accent-foreground focus:bg-accent"
+              >
+                <ExternalLink className="h-4 w-4 mr-2" />
+                Open Source
+              </DropdownMenuItem>
+            )}
+            <DropdownMenuSeparator className="bg-border" />
+            <DropdownMenuItem
+              onClick={onRemove}
+              className="text-destructive focus:text-destructive focus:bg-accent"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Remove from Queue
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </TableCell>
     </TableRow>
   );
 }
 
 export function MainContent({
+  guildId,
   currentTrack,
   queue,
   onAddTrack,
@@ -258,25 +253,25 @@ export function MainContent({
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-gradient-to-b from-secondary to-card border border-border rounded-lg overflow-hidden">
       {/* Header with search autocomplete */}
-      <header className="shrink-0 z-10 p-4 bg-card/80 backdrop-blur-sm">
-        <div className="flex items-center justify-between gap-4">
+      <header className="shrink-0 z-10 p-2 md:p-4 bg-card/80 backdrop-blur-sm">
+        <div className="flex items-center justify-between gap-2 md:gap-4">
           <SearchAutocomplete
             onSearch={onAddTrack}
             isLoading={isAddingTrack}
             placeholder="Search or paste a link..."
-            className="max-w-md"
+            className="flex-1 md:max-w-md"
           />
           <ModeToggle />
         </div>
       </header>
 
       <ScrollArea className="flex-1 min-h-0">
-        <div className="p-6">
+        <div className="p-3 md:p-6">
           {/* Now Playing Hero */}
           {currentTrack ? (
-            <div className="mb-8">
-              <div className="flex items-end gap-6 mb-6">
-                <div className="relative w-56 h-56 flex-shrink-0 shadow-2xl">
+            <div className="mb-6 md:mb-8">
+              <div className="flex flex-col sm:flex-row sm:items-end gap-4 md:gap-6 mb-4 md:mb-6">
+                <div className="relative w-32 h-32 sm:w-40 sm:h-40 md:w-56 md:h-56 flex-shrink-0 shadow-2xl mx-auto sm:mx-0">
                   {currentTrack.artworkUrl ? (
                     <img
                       src={currentTrack.artworkUrl}
@@ -285,45 +280,48 @@ export function MainContent({
                     />
                   ) : (
                     <div className="w-full h-full bg-secondary rounded flex items-center justify-center">
-                      <Disc3 className="h-24 w-24 text-muted-foreground/50 animate-spin-slow" />
+                      <Disc3 className="h-12 w-12 sm:h-16 sm:w-16 md:h-24 md:w-24 text-muted-foreground/50 animate-spin-slow" />
                     </div>
                   )}
                 </div>
-                <div className="flex flex-col justify-end">
-                  <span className="text-xs font-medium text-foreground uppercase tracking-wider mb-2">
+                <div className="flex flex-col justify-end text-center sm:text-left">
+                  <span className="text-xs font-medium text-foreground uppercase tracking-wider mb-1 md:mb-2">
                     Now Playing
                   </span>
-                  <h1 className="text-5xl font-bold text-foreground mb-2 line-clamp-2">
+                  <h1 className="text-xl sm:text-2xl md:text-5xl font-bold text-foreground mb-1 md:mb-2 line-clamp-2">
                     {currentTrack.title}
                   </h1>
-                  <p className="text-secondary-foreground text-lg mb-4">
+                  <p className="text-secondary-foreground text-sm md:text-lg mb-2 md:mb-4">
                     {currentTrack.author}
                   </p>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <div className="flex items-center justify-center sm:justify-start gap-2 text-xs md:text-sm text-muted-foreground flex-wrap">
                     {currentTrack.requestedBy && (
                       <>
                         <span>
                           Requested by {currentTrack.requestedBy.username}
                         </span>
-                        <span>•</span>
+                        <span className="hidden sm:inline">•</span>
                       </>
                     )}
-                    <span>{formatDuration(currentTrack.duration)}</span>
+                    <span>{formatTime(currentTrack.duration)}</span>
                     <span>•</span>
                     <span className="capitalize">
                       {currentTrack.sourceName}
                     </span>
                   </div>
+                  <div className="mt-3 md:mt-4 flex justify-center sm:justify-start">
+                    <AddToPlaylist guildId={guildId} track={currentTrack} variant="button" />
+                  </div>
                 </div>
               </div>
             </div>
           ) : (
-            <div className="mb-8 py-16 text-center">
-              <Music2 className="h-24 w-24 text-muted-foreground/50 mx-auto mb-4" />
-              <h2 className="text-2xl font-bold text-foreground mb-2">
+            <div className="mb-6 md:mb-8 py-8 md:py-16 text-center">
+              <Music2 className="h-16 w-16 md:h-24 md:w-24 text-muted-foreground/50 mx-auto mb-3 md:mb-4" />
+              <h2 className="text-xl md:text-2xl font-bold text-foreground mb-2">
                 Nothing is playing
               </h2>
-              <p className="text-muted-foreground">
+              <p className="text-sm md:text-base text-muted-foreground">
                 Search for a song or paste a link to get started
               </p>
             </div>
@@ -332,7 +330,7 @@ export function MainContent({
           {/* Queue Section */}
           {queue.length > 0 && (
             <div>
-              <h2 className="text-xl font-bold text-foreground mb-4">Up Next</h2>
+              <h2 className="text-lg md:text-xl font-bold text-foreground mb-3 md:mb-4">Up Next</h2>
               <div className="bg-card/50 rounded-lg overflow-hidden">
                 <DndContext
                   sensors={sensors}
@@ -346,10 +344,13 @@ export function MainContent({
                     <Table>
                       <TableHeader>
                         <TableRow className="border-border hover:bg-transparent">
-                          <TableHead className="w-10 text-muted-foreground"></TableHead>
-                          <TableHead className="text-muted-foreground">Title</TableHead>
-                          <TableHead className="w-24 text-muted-foreground text-right">
+                          <TableHead className="w-8 md:w-10 text-muted-foreground"></TableHead>
+                          <TableHead className="text-muted-foreground text-xs md:text-sm">Title</TableHead>
+                          <TableHead className="hidden sm:table-cell w-24 text-muted-foreground text-right text-xs md:text-sm">
                             Duration
+                          </TableHead>
+                          <TableHead className="w-10 md:w-12 text-muted-foreground text-right text-xs md:text-sm">
+                            Actions
                           </TableHead>
                         </TableRow>
                       </TableHeader>
@@ -357,6 +358,7 @@ export function MainContent({
                         {queue.map((track, index) => (
                           <SortableUpNextItem
                             key={`${track.identifier}-${index}`}
+                            guildId={guildId}
                             track={track}
                             index={index}
                             queueLength={queue.length}

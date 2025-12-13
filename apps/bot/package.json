@@ -3,23 +3,25 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "main": "index.ts",
-  "scripts": {
-    "dev": "bun run index.ts",
-    "dev:watch": "bun run --watch index.ts",
-    "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate",
-    "db:studio": "drizzle-kit studio"
-  },
+  "main": "src/index.ts",
+   "scripts": {
+     "start": "bun run src/index.ts",
+     "dev": "bun run --watch src/index.ts",
+     "db:generate": "drizzle-kit generate",
+     "db:migrate": "drizzle-kit migrate",
+     "db:studio": "drizzle-kit studio",
+     "typecheck": "tsc --noEmit"
+   },
   "dependencies": {
     "@discordbot/lavalink": "workspace:*",
     "@discordbot/shared-types": "workspace:*",
     "discord.js": "catalog:",
-    "drizzle-orm": "^0.45.1"
+    "drizzle-orm": "catalog:"
   },
   "devDependencies": {
     "@discordbot/tsconfig": "workspace:*",
-    "better-sqlite3": "^12.5.0",
-    "drizzle-kit": "^0.31.8"
+    "better-sqlite3": "catalog:",
+    "drizzle-kit": "catalog:",
+    "typescript": "catalog:"
   }
 }

@@ -6,25 +6,24 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Music, X, Trash2 } from "lucide-react";
+import { AddToPlaylist } from "./add-to-playlist";
+import { formatTime } from "@/lib/utils";
 
 interface QueueProps {
+  guildId: string;
   tracks: Track[];
   isLoading?: boolean;
   onRemove: (position: number) => void;
   onClear: () => void;
 }
 
-function formatDuration(ms: number): string {
-  const seconds = Math.floor(ms / 1000);
-  const minutes = Math.floor(seconds / 60);
-  return `${minutes}:${String(seconds % 60).padStart(2, "0")}`;
-}
-
 function QueueItem({
+  guildId,
   track,
   position,
   onRemove,
 }: {
+  guildId: string;
   track: Track;
   position: number;
   onRemove: () => void;
@@ -50,17 +49,20 @@ function QueueItem({
         <p className="truncate text-xs text-muted-foreground">{track.author}</p>
       </div>
       <span className="text-xs text-muted-foreground">
-        {formatDuration(track.duration)}
+        {formatTime(track.duration)}
       </span>
-      <Button
-        variant="ghost"
-        size="icon"
-        className="h-8 w-8 opacity-0 group-hover:opacity-100"
-        onClick={onRemove}
-        title="Remove from queue"
-      >
-        <X className="h-4 w-4" />
-      </Button>
+      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100">
+        <AddToPlaylist guildId={guildId} track={track} />
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8"
+          onClick={onRemove}
+          title="Remove from queue"
+        >
+          <X className="h-4 w-4" />
+        </Button>
+      </div>
     </div>
   );
 }
@@ -79,7 +81,7 @@ function QueueSkeleton() {
   );
 }
 
-export function Queue({ tracks, isLoading, onRemove, onClear }: QueueProps) {
+export function Queue({ guildId, tracks, isLoading, onRemove, onClear }: QueueProps) {
   const totalDuration = tracks.reduce((acc, track) => acc + track.duration, 0);
 
   if (isLoading) {
@@ -106,7 +108,7 @@ export function Queue({ tracks, isLoading, onRemove, onClear }: QueueProps) {
           <CardTitle className="text-lg">Queue</CardTitle>
           <p className="text-sm text-muted-foreground">
             {tracks.length} track{tracks.length !== 1 ? "s" : ""} •{" "}
-            {formatDuration(totalDuration)}
+            {formatTime(totalDuration)}
           </p>
         </div>
         {tracks.length > 0 && (
@@ -128,6 +130,7 @@ export function Queue({ tracks, isLoading, onRemove, onClear }: QueueProps) {
               {tracks.map((track, index) => (
                 <QueueItem
                   key={`${track.identifier}-${index}`}
+                  guildId={guildId}
                   track={track}
                   position={index}
                   onRemove={() => onRemove(index)}

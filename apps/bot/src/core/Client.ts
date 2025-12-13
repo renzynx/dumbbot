@@ -1,5 +1,6 @@
 import {
   Client,
+  Collection,
   REST,
   Routes,
   Events,
@@ -14,14 +15,10 @@ import { Command } from "@/core/Command";
 import { CommandContext } from "@/core/Context";
 import { Module } from "@/core/Module";
 import { Event } from "@/core/Event";
-import { Collection } from "@/utils/Collection";
 import { Logger } from "@/utils/Logger";
 import type { MusicManager } from "@/music/MusicManager";
 import type { APIServer } from "@/api/server";
 
-/**
- * Extended Discord.js Client with advanced framework features
- */
 export class BotClient extends Client {
   public readonly botToken: string;
   public readonly clientId: string;

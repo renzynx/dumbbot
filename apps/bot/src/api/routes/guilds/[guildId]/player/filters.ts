@@ -1,9 +1,9 @@
 import { json, type RouteHandler } from "@/api/server";
-import { requireAuth, requireGuildAccess } from "@/api/middleware/auth";
+import { requireAuth, requireGuildAccess, requireDJRole } from "@/api/middleware/auth";
 import { broadcastPlayerUpdate } from "../helpers";
 import type { Filters } from "@discordbot/lavalink";
 
-export const middleware = [requireAuth, requireGuildAccess];
+export const middleware = [requireAuth, requireGuildAccess, requireDJRole];
 
 /**
  * Filter presets available to users

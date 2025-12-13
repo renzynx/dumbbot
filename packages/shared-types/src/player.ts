@@ -2,6 +2,7 @@
  * Music track information from Lavalink
  */
 export interface Track {
+  encoded: string;
   identifier: string;
   title: string;
   author: string;

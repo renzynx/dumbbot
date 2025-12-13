@@ -2,6 +2,7 @@ export { NowPlaying } from "./now-playing";
 export { PlayerControls } from "./player-controls";
 export { Queue } from "./queue";
 export { AddTrack } from "./add-track";
+export { AddToPlaylist } from "./add-to-playlist";
 export { PlayerBar } from "./player-bar";
 export { Sidebar } from "./sidebar";
 export { MainContent } from "./main-content";
