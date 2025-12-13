@@ -50,13 +50,13 @@ const features = [
   {
     icon: Zap,
     title: "fast as my attention span",
-    description: "latency so low it's giving main character energy.",
+    description: "low latency playback. no buffer, no waiting.",
     emoji: "⚡",
   },
   {
     icon: Play,
     title: "web dashboard slay",
-    description: "control everything from browser. it's giving 2024. touch grass later.",
+    description: `control everything from browser. it's giving ${new Date().getFullYear()}. touch grass later.`,
     emoji: "🖥️",
   },
 ];
@@ -290,7 +290,7 @@ export default function LandingPage() {
                 github
               </Link>
               <span>|</span>
-              <span>© 2024 or whatever</span>
+              <span>© {new Date().getFullYear()} or whatever</span>
             </div>
           </div>
         </div>
