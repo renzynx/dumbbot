@@ -12,7 +12,7 @@ import { formatDuration } from "@/utils/format";
 import { GuildSettingsManager } from "./GuildSettings.js";
 import { NowPlayingManager } from "./NowPlayingManager.js";
 import { VoiceManager } from "./VoiceManager.js";
-import type { MusicManagerOptions, QueueTrack, GuildPlayer } from "@/types/music";
+import type { MusicManagerOptions, QueueTrack, GuildPlayer, SearchPlatform } from "@/types/music";
 import { LoopMode } from "@/types/music";
 
 /**
@@ -424,7 +424,7 @@ export class MusicManager {
   /**
    * Search for tracks
    */
-  async search(query: string, platform?: string): Promise<LoadResult> {
+  async search(query: string, platform?: SearchPlatform): Promise<LoadResult> {
     const node = this.getIdealNode();
     if (!node) throw new Error("No available Lavalink nodes");
 
@@ -436,6 +436,9 @@ export class MusicManager {
     switch (searchPlatform) {
       case "youtubemusic": return node.searchYouTubeMusic(query);
       case "soundcloud": return node.searchSoundCloud(query);
+      case "spotify": return node.searchSpotify(query);
+      case "deezer": return node.searchDeezer(query);
+      case "applemusic": return node.searchAppleMusic(query);
       default: return node.searchYouTube(query);
     }
   }

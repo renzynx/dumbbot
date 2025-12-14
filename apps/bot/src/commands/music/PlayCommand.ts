@@ -5,6 +5,16 @@ import type { CommandContext } from "@/core/Context";
 import { SlashCommand, GuildOnly } from "@/decorators";
 import { formatDuration } from "@/utils/format";
 import type { Track } from "@discordbot/lavalink";
+import type { SearchPlatform } from "@/types/music";
+
+const PLATFORM_CHOICES = [
+  { name: "YouTube", value: "youtube" },
+  { name: "YouTube Music", value: "youtubemusic" },
+  { name: "SoundCloud", value: "soundcloud" },
+  { name: "Spotify", value: "spotify" },
+  { name: "Deezer", value: "deezer" },
+  { name: "Apple Music", value: "applemusic" },
+] as const;
 
 /**
  * Format track name for autocomplete display
@@ -49,11 +59,19 @@ export class PlayCommand extends Command {
           .setDescription("Song name or URL")
           .setRequired(true)
           .setAutocomplete(true)
+      )
+      .addStringOption((option) =>
+        option
+          .setName("source")
+          .setDescription("Music source to search from")
+          .setRequired(false)
+          .addChoices(...PLATFORM_CHOICES)
       );
   }
 
   override async autocomplete(interaction: AutocompleteInteraction): Promise<void> {
     const query = interaction.options.getFocused();
+    const source = interaction.options.getString("source") as SearchPlatform | null;
     
     // Don't search for very short queries or URLs
     if (query.length < 2 || query.startsWith("http://") || query.startsWith("https://")) {
@@ -68,7 +86,7 @@ export class PlayCommand extends Command {
     }
 
     try {
-      const result = await music.search(query);
+      const result = await music.search(query, source ?? undefined);
       
       let tracks: Track[] = [];
       
@@ -104,6 +122,7 @@ export class PlayCommand extends Command {
 
   async execute(ctx: CommandContext): Promise<void> {
     const query = ctx.interaction.options.getString("query", true);
+    const source = ctx.interaction.options.getString("source") as SearchPlatform | null;
     const member = ctx.member;
 
     if (!member?.voice.channel) {
@@ -146,7 +165,7 @@ export class PlayCommand extends Command {
       queue.textChannelId = ctx.channel?.id ?? null;
 
       // Search for the track
-      const result = await music.search(query);
+      const result = await music.search(query, source ?? undefined);
 
       if (result.loadType === "empty" || result.loadType === "error") {
         await ctx.editReply({

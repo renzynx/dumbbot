@@ -191,6 +191,27 @@ export class LavalinkNode {
   }
 
   /**
+   * Search for tracks on Spotify (requires LavaSrc plugin)
+   */
+  async searchSpotify(query: string): Promise<LoadResult> {
+    return this.rest.loadTracks(`spsearch:${query}`);
+  }
+
+  /**
+   * Search for tracks on Deezer (requires LavaSrc plugin)
+   */
+  async searchDeezer(query: string): Promise<LoadResult> {
+    return this.rest.loadTracks(`dzsearch:${query}`);
+  }
+
+  /**
+   * Search for tracks on Apple Music (requires LavaSrc plugin)
+   */
+  async searchAppleMusic(query: string): Promise<LoadResult> {
+    return this.rest.loadTracks(`amsearch:${query}`);
+  }
+
+  /**
    * Decode an encoded track
    */
   async decodeTrack(encoded: string): Promise<Track> {

@@ -48,10 +48,18 @@ export interface SavedTrack {
   artworkUrl?: string;
 }
 
+export type SearchPlatform = 
+  | "youtube" 
+  | "youtubemusic" 
+  | "soundcloud" 
+  | "spotify" 
+  | "deezer" 
+  | "applemusic";
+
 export interface MusicManagerOptions {
   nodes: Omit<import("@discordbot/lavalink").LavalinkNodeOptions, "userId">[];
   defaultVolume?: number;
-  defaultSearchPlatform?: "youtube" | "youtubemusic" | "soundcloud";
+  defaultSearchPlatform?: SearchPlatform;
 }
 
 export interface VoiceConnection {
