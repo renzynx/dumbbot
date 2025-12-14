@@ -1,4 +1,5 @@
-import { json, type RouteHandler, type Middleware } from "@/api/server";
+import { json } from "@discordbot/api";
+import type { RouteHandler, Middleware } from "@/types/api";
 import {
   exchangeCode,
   fetchDiscordUser,

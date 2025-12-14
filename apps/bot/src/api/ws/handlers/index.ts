@@ -1,4 +1,4 @@
-import type { WSHandler } from "@/api/server";
+import type { WSHandler } from "@/types/api";
 import { connectionHandlers } from "./connection";
 import { playerHandlers } from "./player";
 import { queueHandlers } from "./queue";

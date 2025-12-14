@@ -1,4 +1,4 @@
-import { type RouteHandler } from "@/api/server";
+import type { RouteHandler } from "@/types/api";
 import { getSessionToken } from "@/api/middleware/auth";
 import { deleteSession } from "@/db/sessions";
 

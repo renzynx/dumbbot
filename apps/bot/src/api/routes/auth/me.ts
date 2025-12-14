@@ -1,4 +1,5 @@
-import { json, type RouteHandler } from "@/api/server";
+import { json } from "@discordbot/api";
+import type { RouteHandler } from "@/types/api";
 import { requireAuth, fetchUserGuilds, filterCommonGuilds } from "@/api/middleware/auth";
 import { getSessionToken } from "@/api/middleware/auth";
 import {

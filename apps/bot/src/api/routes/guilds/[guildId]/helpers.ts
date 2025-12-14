@@ -1,4 +1,4 @@
-import type { APIServer } from "@/api/server";
+import type { BotAPIServer } from "@/types/api";
 import type { QueueTrack, HistoryTrack } from "@/music/Queue";
 import type { MusicManager } from "@/music/MusicManager";
 import type { Client, VoiceBasedChannel } from "discord.js";
@@ -40,7 +40,7 @@ export function formatHistoryTrack(track: HistoryTrack) {
  * Broadcast player update to all subscribed WebSocket clients
  * Uses cached player state from MusicManager for better performance
  */
-export function broadcastPlayerUpdate(server: APIServer, music: MusicManager, guildId: string) {
+export function broadcastPlayerUpdate(server: BotAPIServer, music: MusicManager, guildId: string) {
   // Delegate to MusicManager's broadcastPlayerUpdate which uses cached state
   music.broadcastPlayerUpdate(guildId);
 }

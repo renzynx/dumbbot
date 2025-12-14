@@ -13,6 +13,7 @@
      "typecheck": "tsc --noEmit"
    },
   "dependencies": {
+    "@discordbot/api": "workspace:*",
     "@discordbot/lavalink": "workspace:*",
     "@discordbot/shared-types": "workspace:*",
     "discord.js": "catalog:",

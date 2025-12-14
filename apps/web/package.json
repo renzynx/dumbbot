@@ -34,7 +34,7 @@
 		"@discordbot/tsconfig": "workspace:*",
 		"@tailwindcss/postcss": "^4.1.18",
 		"@tanstack/react-query-devtools": "^5.91.1",
-		"@types/node": "^20.19.26",
+		"@types/node": "catalog:",
 		"@types/react": "^19.2.7",
 		"@types/react-dom": "^19.2.3",
 		"babel-plugin-react-compiler": "1.0.0",

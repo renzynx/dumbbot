@@ -1,4 +1,4 @@
-import type { WSContext, WSHandler } from "@/api/server";
+import type { WSContext, WSHandler } from "@/types/api";
 import { formatTrack, ensureVoiceConnection } from "@/api/routes/guilds/[guildId]/helpers";
 import {
   sendError,

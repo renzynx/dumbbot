@@ -1,4 +1,5 @@
-import { json, type RouteHandler } from "@/api/server";
+import { json } from "@discordbot/api";
+import type { RouteHandler } from "@/types/api";
 import { requireAuth, requireGuildAccess, requireDJRole } from "@/api/middleware/auth";
 import { broadcastPlayerUpdate } from "../helpers";
 import type { Filters } from "@discordbot/lavalink";

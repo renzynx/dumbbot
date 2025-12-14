@@ -1,41 +1,46 @@
+import type { APIServer } from "@discordbot/api";
 import type { ServerWebSocket } from "bun";
 import type { BotClient } from "@/core/Client";
 import type { AuthUser } from "@discordbot/shared-types";
 
 export type { AuthUser } from "@discordbot/shared-types";
+export type { WebSocketData, WSMessage } from "@discordbot/api";
 
-export interface RouteContext {
-  req: Request;
-  params: Record<string, string>;
-  query: URLSearchParams;
-  client: BotClient;
-  server: APIServer;
-  user?: AuthUser;
-  json: <T = unknown>() => Promise<T>;
-}
+// Bot-specific API server type using the base APIServer
+export type BotAPIServer = APIServer<BotClient>;
 
-export interface WebSocketData {
+// WebSocket data structure
+interface WebSocketData {
   userId?: string;
   guildId?: string;
   subscriptions: Set<string>;
 }
 
+// Bot-specific route context with AuthUser
+export interface RouteContext {
+  req: Request;
+  params: Record<string, string>;
+  query: URLSearchParams;
+  client: BotClient;
+  server: BotAPIServer;
+  user?: AuthUser;
+  json: <T = unknown>() => Promise<T>;
+}
+
+// Bot-specific WebSocket context
 export interface WSContext {
   ws: ServerWebSocket<WebSocketData>;
   data: Record<string, unknown>;
   client: BotClient;
-  server: APIServer;
+  server: BotAPIServer;
 }
 
-export interface WSMessage {
-  type: string;
-  [key: string]: unknown;
-}
-
+// Bot-specific handlers
 export type RouteHandler = (ctx: RouteContext) => Response | Promise<Response>;
 export type WSHandler = (ctx: WSContext) => void | Promise<void>;
 export type Middleware = (ctx: RouteContext, next: () => Promise<Response>) => Response | Promise<Response>;
 
+// Bot-specific modules
 export interface RouteModule {
   GET?: RouteHandler;
   POST?: RouteHandler;
@@ -48,6 +53,3 @@ export interface RouteModule {
 export interface WSModule {
   handlers: Record<string, WSHandler>;
 }
-
-// Type alias for APIServer to avoid circular dependency
-export type APIServer = import("../api/server").APIServer;

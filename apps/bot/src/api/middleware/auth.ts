@@ -1,4 +1,5 @@
-import { json, type Middleware } from "@/api/server";
+import { json } from "@discordbot/api";
+import type { Middleware } from "@/types/api";
 import {
   getSessionWithAccount,
   accountToAuthUser,

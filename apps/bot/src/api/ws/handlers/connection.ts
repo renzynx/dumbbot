@@ -1,4 +1,4 @@
-import type { WSContext, WSHandler } from "@/api/server";
+import type { WSContext, WSHandler } from "@/types/api";
 import { LoopMode } from "@/music/Queue";
 import { formatTrack } from "@/api/routes/guilds/[guildId]/helpers";
 import { validateWSToken } from "@/db/sessions";

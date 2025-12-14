@@ -1,4 +1,5 @@
-import { redirect, type RouteHandler, type Middleware } from "@/api/server";
+import { redirect } from "@discordbot/api";
+import type { RouteHandler, Middleware } from "@/types/api";
 import { DISCORD_CONFIG } from "@/api/middleware/auth";
 import { authRateLimit } from "@/api/middleware/rate-limit";
 import { createOAuthState } from "@/db/sessions";
