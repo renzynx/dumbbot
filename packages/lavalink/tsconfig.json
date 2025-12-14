@@ -1,5 +1,5 @@
 {
-  "extends": "@discordbot/tsconfig/bun-library",
+  "extends": "@dumbbot/tsconfig/bun-library",
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {

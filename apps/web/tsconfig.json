@@ -1,5 +1,5 @@
 {
-  "extends": "@discordbot/tsconfig/nextjs",
+  "extends": "@dumbbot/tsconfig/nextjs",
   "compilerOptions": {
     "paths": {
       "@/*": ["./src/*"]

@@ -1,5 +1,5 @@
 {
-  "extends": "@discordbot/tsconfig/bun",
+  "extends": "@dumbbot/tsconfig/bun",
   "compilerOptions": {
     "baseUrl": ".",
     "target": "ESNext",

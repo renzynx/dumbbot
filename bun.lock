@@ -6,37 +6,37 @@
       "name": "discordbot",
       "devDependencies": {
         "@biomejs/biome": "^2.3.8",
-        "@discordbot/tsconfig": "workspace:*",
+        "@dumbbot/tsconfig": "workspace:*",
         "@types/bun": "latest",
         "@types/node": "catalog:",
         "typescript": "catalog:",
       },
     },
     "apps/bot": {
-      "name": "@discordbot/bot",
+      "name": "@dumbbot/bot",
       "version": "1.0.0",
       "dependencies": {
-        "@discordbot/api": "workspace:*",
-        "@discordbot/lavalink": "workspace:*",
-        "@discordbot/shared-types": "workspace:*",
+        "@dumbbot/api": "workspace:*",
+        "@dumbbot/lavalink": "workspace:*",
+        "@dumbbot/shared-types": "workspace:*",
         "discord.js": "catalog:",
         "drizzle-orm": "catalog:",
       },
       "devDependencies": {
-        "@discordbot/tsconfig": "workspace:*",
+        "@dumbbot/tsconfig": "workspace:*",
         "better-sqlite3": "catalog:",
         "drizzle-kit": "catalog:",
         "typescript": "catalog:",
       },
     },
     "apps/web": {
-      "name": "@discordbot/web",
+      "name": "@dumbbot/web",
       "version": "0.1.0",
       "dependencies": {
-        "@discordbot/shared-types": "workspace:*",
         "@dnd-kit/core": "^6.3.1",
         "@dnd-kit/sortable": "^10.0.0",
         "@dnd-kit/utilities": "^3.2.2",
+        "@dumbbot/shared-types": "workspace:*",
         "@radix-ui/react-avatar": "^1.1.11",
         "@radix-ui/react-dialog": "^1.1.15",
         "@radix-ui/react-dropdown-menu": "^2.1.16",
@@ -56,7 +56,7 @@
         "tailwind-merge": "^3.4.0",
       },
       "devDependencies": {
-        "@discordbot/tsconfig": "workspace:*",
+        "@dumbbot/tsconfig": "workspace:*",
         "@tailwindcss/postcss": "^4.1.18",
         "@tanstack/react-query-devtools": "^5.91.1",
         "@types/node": "catalog:",
@@ -69,31 +69,31 @@
       },
     },
     "packages/api": {
-      "name": "@discordbot/api",
+      "name": "@dumbbot/api",
       "version": "1.0.0",
       "devDependencies": {
-        "@discordbot/tsconfig": "workspace:*",
+        "@dumbbot/tsconfig": "workspace:*",
       },
     },
     "packages/lavalink": {
-      "name": "@discordbot/lavalink",
+      "name": "@dumbbot/lavalink",
       "version": "1.0.0",
       "devDependencies": {
-        "@discordbot/tsconfig": "workspace:*",
+        "@dumbbot/tsconfig": "workspace:*",
       },
       "peerDependencies": {
         "discord.js": "catalog:",
       },
     },
     "packages/shared-types": {
-      "name": "@discordbot/shared-types",
+      "name": "@dumbbot/shared-types",
       "version": "1.0.0",
       "devDependencies": {
-        "@discordbot/tsconfig": "workspace:*",
+        "@dumbbot/tsconfig": "workspace:*",
       },
     },
     "packages/tsconfig": {
-      "name": "@discordbot/tsconfig",
+      "name": "@dumbbot/tsconfig",
       "version": "1.0.0",
     },
   },
@@ -135,18 +135,6 @@
 
     "@biomejs/cli-win32-x64": ["@biomejs/cli-win32-x64@2.3.8", "", { "os": "win32", "cpu": "x64" }, "sha512-RguzimPoZWtBapfKhKjcWXBVI91tiSprqdBYu7tWhgN8pKRZhw24rFeNZTNf6UiBfjCYCi9eFQs/JzJZIhuK4w=="],
 
-    "@discordbot/api": ["@discordbot/api@workspace:packages/api"],
-
-    "@discordbot/bot": ["@discordbot/bot@workspace:apps/bot"],
-
-    "@discordbot/lavalink": ["@discordbot/lavalink@workspace:packages/lavalink"],
-
-    "@discordbot/shared-types": ["@discordbot/shared-types@workspace:packages/shared-types"],
-
-    "@discordbot/tsconfig": ["@discordbot/tsconfig@workspace:packages/tsconfig"],
-
-    "@discordbot/web": ["@discordbot/web@workspace:apps/web"],
-
     "@discordjs/builders": ["@discordjs/builders@1.13.1", "", { "dependencies": { "@discordjs/formatters": "^0.6.2", "@discordjs/util": "^1.2.0", "@sapphire/shapeshift": "^4.0.0", "discord-api-types": "^0.38.33", "fast-deep-equal": "^3.1.3", "ts-mixer": "^6.0.4", "tslib": "^2.6.3" } }, "sha512-cOU0UDHc3lp/5nKByDxkmRiNZBpdp0kx55aarbiAfakfKJHlxv/yFW1zmIqCAmwH5CRlrH9iMFKJMpvW4DPB+w=="],
 
     "@discordjs/collection": ["@discordjs/collection@1.5.3", "", {}, "sha512-SVb428OMd3WO1paV3rm6tSjM4wC+Kecaa1EUGX7vc6/fddvw/6lg90z4QtCqm21zvVe92vMMDt9+DkIvjXImQQ=="],
@@ -168,6 +156,18 @@
     "@dnd-kit/utilities": ["@dnd-kit/utilities@3.2.2", "", { "dependencies": { "tslib": "^2.0.0" }, "peerDependencies": { "react": ">=16.8.0" } }, "sha512-+MKAJEOfaBe5SmV6t34p80MMKhjvUz0vRrvVJbPT0WElzaOJ/1xs+D+KDv+tD/NE5ujfrChEcshd4fLn0wpiqg=="],
 
     "@drizzle-team/brocli": ["@drizzle-team/brocli@0.10.2", "", {}, "sha512-z33Il7l5dKjUgGULTqBsQBQwckHh5AbIuxhdsIxDDiZAzBOrZO6q9ogcWC65kU382AfynTfgNumVcNIjuIua6w=="],
+
+    "@dumbbot/api": ["@dumbbot/api@workspace:packages/api"],
+
+    "@dumbbot/bot": ["@dumbbot/bot@workspace:apps/bot"],
+
+    "@dumbbot/lavalink": ["@dumbbot/lavalink@workspace:packages/lavalink"],
+
+    "@dumbbot/shared-types": ["@dumbbot/shared-types@workspace:packages/shared-types"],
+
+    "@dumbbot/tsconfig": ["@dumbbot/tsconfig@workspace:packages/tsconfig"],
+
+    "@dumbbot/web": ["@dumbbot/web@workspace:apps/web"],
 
     "@emnapi/runtime": ["@emnapi/runtime@1.7.1", "", { "dependencies": { "tslib": "^2.4.0" } }, "sha512-PVtJr5CmLwYAU9PZDMITZoR5iAOShYREoR45EyyLrbntV50mdePTgUn4AmOw90Ifcj+x2kRjdzr1HP3RrNiHGA=="],
 

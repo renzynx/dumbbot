@@ -1,5 +1,5 @@
 {
-  "name": "@discordbot/bot",
+  "name": "@dumbbot/bot",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -13,14 +13,14 @@
      "typecheck": "tsc --noEmit"
    },
   "dependencies": {
-    "@discordbot/api": "workspace:*",
-    "@discordbot/lavalink": "workspace:*",
-    "@discordbot/shared-types": "workspace:*",
+    "@dumbbot/api": "workspace:*",
+    "@dumbbot/lavalink": "workspace:*",
+    "@dumbbot/shared-types": "workspace:*",
     "discord.js": "catalog:",
     "drizzle-orm": "catalog:"
   },
   "devDependencies": {
-    "@discordbot/tsconfig": "workspace:*",
+    "@dumbbot/tsconfig": "workspace:*",
     "better-sqlite3": "catalog:",
     "drizzle-kit": "catalog:",
     "typescript": "catalog:"
